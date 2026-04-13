@@ -1,20 +1,22 @@
-import sqlite3
+import os
+import psycopg2
+import psycopg2.extras
 from constants import DEFAULT_CATEGORIES
 
-DATABASE_NAME = "splendy.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 DEFAULT_CURRENCY = "UAH"
 DEFAULT_NOTIFICATIONS = 1
 
 
 def get_db():
-    conn = sqlite3.connect(DATABASE_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL)
     return conn
 
 
 def init_db():
-    db = get_db()
-    db.executescript(f"""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
@@ -29,7 +31,7 @@ def init_db():
             user_id TEXT,
             is_default INTEGER DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id),
-            CONSTRAINT unique_category UNIQUE (name, user_id, is_default)
+            UNIQUE (name, user_id, is_default)
         );
         CREATE TABLE IF NOT EXISTS expenses (
             id TEXT PRIMARY KEY,
@@ -44,9 +46,10 @@ def init_db():
         );
     """)
     for name in DEFAULT_CATEGORIES:
-        db.execute(
-            "INSERT OR IGNORE INTO categories (id, name, is_default) VALUES (lower(hex(randomblob(16))), ?, 1)",
+        cur.execute(
+            "INSERT INTO categories (id, name, is_default) VALUES (gen_random_uuid()::text, %s, 1) ON CONFLICT DO NOTHING",
             (name,)
         )
-    db.commit()
-    db.close()
+    conn.commit()
+    cur.close()
+    conn.close()
