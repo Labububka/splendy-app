@@ -14,7 +14,7 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_token(user_id: int) -> str:
+def create_token(user_id: str) -> str:
     return jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 

@@ -14,12 +14,9 @@ def get_db():
 
 def init_db():
     db = get_db()
-    default_categories_sql = ", ".join(
-        [f"('{name}', 1)" for name in DEFAULT_CATEGORIES]
-    )
     db.executescript(f"""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             name TEXT NOT NULL,
@@ -27,24 +24,29 @@ def init_db():
             notifications INTEGER DEFAULT {DEFAULT_NOTIFICATIONS}
         );
         CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            user_id INTEGER,
+            user_id TEXT,
             is_default INTEGER DEFAULT 0,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            CONSTRAINT unique_category UNIQUE (name, user_id, is_default)
         );
         CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
             amount REAL NOT NULL,
-            category_id INTEGER,
+            category_id TEXT,
             note TEXT,
             date TEXT NOT NULL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (category_id) REFERENCES categories(id)
         );
-        INSERT OR IGNORE INTO categories (name, is_default) VALUES {default_categories_sql};
     """)
+    for name in DEFAULT_CATEGORIES:
+        db.execute(
+            "INSERT OR IGNORE INTO categories (id, name, is_default) VALUES (lower(hex(randomblob(16))), ?, 1)",
+            (name,)
+        )
     db.commit()
     db.close()

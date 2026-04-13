@@ -8,7 +8,7 @@ MAX_NOTE_LENGTH = 255
 
 class ExpenseCreate(BaseModel):
     amount: float
-    category_id: Optional[int] = None
+    category_id: Optional[str] = None
     note: Optional[str] = None
     date: Optional[str] = None
 

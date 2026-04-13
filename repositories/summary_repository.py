@@ -1,7 +1,7 @@
 from database import get_db
 
 
-def get_weekly_breakdown(user_id: int, week_start: str, week_end: str):
+def get_weekly_breakdown(user_id: str, week_start: str, week_end: str):
     db = get_db()
     rows = db.execute("""
         SELECT c.name as category, SUM(e.amount) as total
@@ -14,7 +14,7 @@ def get_weekly_breakdown(user_id: int, week_start: str, week_end: str):
     return [dict(r) for r in rows]
 
 
-def get_monthly_breakdown(user_id: int, month: str):
+def get_monthly_breakdown(user_id: str, month: str):
     db = get_db()
     rows = db.execute("""
         SELECT c.name as category, SUM(e.amount) as total
@@ -27,7 +27,7 @@ def get_monthly_breakdown(user_id: int, month: str):
     return [dict(r) for r in rows]
 
 
-def get_small_purchases(user_id: int, week_start: str, categories: tuple):
+def get_small_purchases(user_id: str, week_start: str, categories: tuple):
     db = get_db()
     placeholders = ",".join("?" * len(categories))
     rows = db.execute(f"""

@@ -7,16 +7,16 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 
 @router.get("")
-def get_categories(user_id: int = Depends(get_current_user)):
+def get_categories(user_id: str = Depends(get_current_user)):
     return category_service.get_all(user_id)
 
 
 @router.post("", status_code=201)
-def create_category(body: CategoryCreate, user_id: int = Depends(get_current_user)):
+def create_category(body: CategoryCreate, user_id: str = Depends(get_current_user)):
     return category_service.create(body.name, user_id)
 
 
 @router.delete("/{category_id}")
-def delete_category(category_id: int, user_id: int = Depends(get_current_user)):
+def delete_category(category_id: str, user_id: str = Depends(get_current_user)):
     category_service.delete(category_id, user_id)
     return {"message": "Deleted"}
