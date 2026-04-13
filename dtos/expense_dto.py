@@ -24,8 +24,8 @@ class ExpenseCreate(BaseModel):
     @field_validator("category_id")
     @classmethod
     def category_id_valid(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("category_id must be a positive integer")
+        if v is not None and not v.strip():
+            raise ValueError("category_id cannot be empty")
         return v
 
     @field_validator("note")
@@ -50,7 +50,7 @@ class ExpenseCreate(BaseModel):
 
 class ExpenseUpdate(BaseModel):
     amount: Optional[float] = None
-    category_id: Optional[int] = None
+    category_id: Optional[str] = None
     note: Optional[str] = None
     date: Optional[str] = None
 
@@ -68,8 +68,8 @@ class ExpenseUpdate(BaseModel):
     @field_validator("category_id")
     @classmethod
     def category_id_valid(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("category_id must be a positive integer")
+        if v is not None and not v.strip():
+            raise ValueError("category_id cannot be empty")
         return v
 
     @field_validator("note")
